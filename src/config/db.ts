@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize-typescript";
-import { DB_NAME, DB_PASSWORD, DB_USER } from "../constants";
+import { DB_NAME, DB_PASSWORD, DB_USER, NODE_ENV } from "../constants";
 import { User } from "../models";
 
 const db = new Sequelize({
@@ -7,8 +7,9 @@ const db = new Sequelize({
   dialect: "sqlite",
   username: DB_USER,
   password: DB_PASSWORD,
-  storage: "./src/database/db.sqlite",
+  storage: NODE_ENV === "test" ? ":memory:" : "./src/database/db.sqlite",
   models: [User],
+  logging: false,
 });
 
 export default db;
