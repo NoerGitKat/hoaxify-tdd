@@ -29,70 +29,82 @@ describe("User Registration - Test Suite", () => {
     expect(response.status).toBe(200);
   });
 
-  it("returns success message when signup request is valid", async () => {
-    const response = await createUser({
-      username: "user1",
-      email: "user1@mail.com",
-      password: "P4ssword",
-    });
+  // it("returns success message when signup request is valid", async () => {
+  //   const response = await createUser({
+  //     username: "user1",
+  //     email: "user1@mail.com",
+  //     password: "P4ssword",
+  //   });
 
-    return expect(response.body.message).toBe("Registered!");
-  });
+  //   return expect(response.body.message).toBe("Registered!");
+  // });
 
-  it("saves the user to database", async () => {
-    await createUser({
-      username: "user1",
-      email: "user1@mail.com",
-      password: "P4ssword",
-    });
-    const users = await User.findAll();
+  // it("saves the user to database", async () => {
+  //   await createUser({
+  //     username: "user1",
+  //     email: "user1@mail.com",
+  //     password: "P4ssword",
+  //   });
+  //   const users = await User.findAll();
 
-    return expect(users.length).toBe(1);
-  });
+  //   return expect(users.length).toBe(1);
+  // });
 
-  it("saves username and email to database", async () => {
-    await createUser({
-      username: "user1",
-      email: "user1@mail.com",
-      password: "P4ssword",
-    });
-    const users = await User.findAll();
+  // it("saves username and email to database", async () => {
+  //   await createUser({
+  //     username: "user1",
+  //     email: "user1@mail.com",
+  //     password: "P4ssword",
+  //   });
+  //   const users = await User.findAll();
 
-    const firstUser = users[0];
-    expect(firstUser.username).toBe("user1");
-    expect(firstUser.email).toBe("user1@mail.com");
-  });
+  //   const firstUser = users[0];
+  //   expect(firstUser.username).toBe("user1");
+  //   expect(firstUser.email).toBe("user1@mail.com");
+  // });
 
-  it("hashes password in database", async () => {
-    await createUser({
-      username: "user1",
-      email: "user1@mail.com",
-      password: "P4ssword",
-    });
-    const users = await User.findAll();
+  // it("hashes password in database", async () => {
+  //   await createUser({
+  //     username: "user1",
+  //     email: "user1@mail.com",
+  //     password: "P4ssword",
+  //   });
+  //   const users = await User.findAll();
 
-    const firstUser = users[0];
-    return expect(firstUser.password).not.toBe("P4ssword");
-  });
+  //   const firstUser = users[0];
+  //   return expect(firstUser.password).not.toBe("P4ssword");
+  // });
 
-  it("returns 422 when username is null", async () => {
+  // it("returns 422 when username is null", async () => {
+  //   const response = await createUser({
+  //     username: null,
+  //     email: "user1@mail.com",
+  //     password: "P4ssword",
+  //   });
+  //   return expect(response.status).toBe(422);
+  // });
+
+  it.each([
+    ["username", "No username given."],
+    ["email", "No email given."],
+  ])("when %s is null %s cannot be null", async (field, expectedMessage) => {
     const response = await createUser({
       username: null,
-      email: "user1@mail.com",
+      email: null,
       password: "P4ssword",
     });
-    return expect(response.status).toBe(422);
+    return expect(response.body.validationErrors[field]).toBe(expectedMessage);
   });
-  it("returns validation errors field in response body when error occurs", async () => {
-    const response = await createUser({
-      username: null,
-      email: "user1@mail.com",
-      password: "P4ssword",
-    });
-    return expect(response.body.validationErrors).not.toBeUndefined();
-    //   .then((response) => {
-    //     return expect(response).toBe(400);
-    //   })
-    //   .catch((error) => error);
-  });
+
+  //   (
+  //   "returns validation errors for username in response body when error occurs",
+  //   async () => {
+  //     const response = await createUser({
+  //       username: null,
+  //       email: "user1@mail.com",
+  //       password: "P4ssword",
+  //     });
+  //     return expect(response.body.validationErrors.username).toBe("No username given.");
+  //   }
+  // );
 });

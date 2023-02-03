@@ -2,10 +2,14 @@ import { hash } from "bcrypt";
 import { Request, Response } from "express";
 import { User } from "../models";
 
-export async function registerUser(req: Request, res: Response) {
-  if (!req.body.username) {
-    return res.status(422).json({ message: "No username given." });
-  }
+export async function registerUser(
+  req: Request<{
+    username: string | null;
+    password: string | null;
+    email: string | null;
+  }>,
+  res: Response
+) {
   try {
     const hashedPassword = await hash(req.body.password, 10);
     const hashedUser = {
