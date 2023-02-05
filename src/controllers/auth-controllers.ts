@@ -1,16 +1,9 @@
-import { hash } from "bcrypt";
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { User } from "../models";
+import UserService from "../services/UserService";
+import { TUser } from "../types";
 
-export async function registerUser(
-  req: Request<{
-    username: string | null;
-    password: string | null;
-    email: string | null;
-  }>,
-  res: Response
-) {
+export async function registerUser(req: Request<TUser>, res: Response) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const validationErrors: { [key: string]: string } = {};
@@ -22,12 +15,7 @@ export async function registerUser(
   }
 
   try {
-    const hashedPassword = await hash(req.body.password, 10);
-    const hashedUser = {
-      ...req.body,
-      password: hashedPassword,
-    };
-    const newUser = await User.create(hashedUser);
+    const newUser = await UserService.save(req.body);
     if (newUser) {
       return res.status(200).json({ message: req.t("registerSuccess") });
     }

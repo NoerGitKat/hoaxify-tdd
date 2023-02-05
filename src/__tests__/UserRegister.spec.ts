@@ -156,4 +156,34 @@ describe("User Registration - Test Suite", () => {
 
     return expect(Object.keys(response.body.validationErrors)).toEqual(["username", "email"]);
   });
+
+  it("creates user in inactive mode", async () => {
+    await createUser();
+    const users = await User.findAll();
+    const firstUser = users[0];
+
+    expect(firstUser.inactive).toBe(true);
+  });
+
+  it("creates user in inactive mode also when inactive is false", async () => {
+    const newUser = {
+      username: "user1",
+      email: "user1@mail.com",
+      password: "P4ssword",
+      inactive: false,
+    };
+    await createUser(newUser);
+    const users = await User.findAll();
+    const firstUser = users[0];
+
+    expect(firstUser.inactive).toBe(true);
+  });
+
+  it("creates activation token for user after register", async () => {
+    await createUser();
+    const users = await User.findAll();
+    const firstUser = users[0];
+
+    expect(firstUser.activationToken).toBeTruthy();
+  });
 });
