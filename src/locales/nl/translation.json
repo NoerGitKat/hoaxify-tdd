@@ -1,0 +1,11 @@
+{
+  "registerSuccess": "Geregistreerd!",
+  "usernameEmpty": "Geen gebruikersnaam opgegeven.",
+  "usernameLength": "Moet korter zijn dan 4 en langer dan 32 karakters.",
+  "emailEmpty": "Geen e-mailadres opgegeven.",
+  "emailInvalid": "E-mail is niet geldig.",
+  "emailInUse": "E-mail in gebruik.",
+  "passwordEmpty": "Geen wachtwoord opgegeven.",
+  "passwordReqs": "Wachtwoord moet minimaal 1 kleine letter, 1 hoofdletter en 1 cijferteken bevatten.",
+  "passwordLength": "Wachtwoord moet minimaal 6 tekens lang zijn."
+}

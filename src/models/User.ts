@@ -1,6 +1,8 @@
 import { Column, Model, Table } from "sequelize-typescript";
 
-@Table
+@Table({
+  indexes: [{ fields: ["email"], unique: true }],
+})
 class User extends Model {
   @Column username!: string;
 

@@ -7,7 +7,7 @@ const db = new Sequelize({
   dialect: "sqlite",
   username: DB_USER,
   password: DB_PASSWORD,
-  storage: NODE_ENV === "test" ? ":memory:" : "./src/database/db.sqlite",
+  storage: NODE_ENV === "test" ? ":memory:" : "./src/db/db.sqlite",
   models: [User],
   logging: false,
 });

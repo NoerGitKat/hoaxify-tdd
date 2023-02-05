@@ -1,14 +1,8 @@
-import request from "supertest";
+import { expect } from "@jest/globals";
 import db from "../config/db";
+import { createUser } from "../helpers";
+import translations from "../locales";
 import { User } from "../models";
-import { app } from "../server";
-import { TUser } from "../types";
-
-const createUser = (
-  user: TUser = { username: "user1", email: "user1@mail.com", password: "P4ssword" }
-) => {
-  return request(app).post("/api/v1/auth/register").send(user);
-};
 
 describe("User Registration - Test Suite", () => {
   beforeAll(() => {
@@ -29,82 +23,137 @@ describe("User Registration - Test Suite", () => {
     expect(response.status).toBe(200);
   });
 
-  // it("returns success message when signup request is valid", async () => {
-  //   const response = await createUser({
-  //     username: "user1",
-  //     email: "user1@mail.com",
-  //     password: "P4ssword",
-  //   });
+  it("returns success message when signup request is valid", async () => {
+    const response = await createUser({
+      username: "user1",
+      email: "user1@mail.com",
+      password: "P4ssword",
+    });
 
-  //   return expect(response.body.message).toBe("Registered!");
-  // });
+    return expect(response.body.message).toBe(translations.en.registerSuccess);
+  });
 
-  // it("saves the user to database", async () => {
-  //   await createUser({
-  //     username: "user1",
-  //     email: "user1@mail.com",
-  //     password: "P4ssword",
-  //   });
-  //   const users = await User.findAll();
+  it("saves the user to database", async () => {
+    await createUser({
+      username: "user1",
+      email: "user1@mail.com",
+      password: "P4ssword",
+    });
+    const users = await User.findAll();
 
-  //   return expect(users.length).toBe(1);
-  // });
+    return expect(users.length).toBe(1);
+  });
 
-  // it("saves username and email to database", async () => {
-  //   await createUser({
-  //     username: "user1",
-  //     email: "user1@mail.com",
-  //     password: "P4ssword",
-  //   });
-  //   const users = await User.findAll();
+  it("saves username and email to database", async () => {
+    await createUser({
+      username: "user1",
+      email: "user1@mail.com",
+      password: "P4ssword",
+    });
+    const users = await User.findAll();
 
-  //   const firstUser = users[0];
-  //   expect(firstUser.username).toBe("user1");
-  //   expect(firstUser.email).toBe("user1@mail.com");
-  // });
+    const firstUser = users[0];
+    expect(firstUser.username).toBe("user1");
+    expect(firstUser.email).toBe("user1@mail.com");
+  });
 
-  // it("hashes password in database", async () => {
-  //   await createUser({
-  //     username: "user1",
-  //     email: "user1@mail.com",
-  //     password: "P4ssword",
-  //   });
-  //   const users = await User.findAll();
+  it("hashes password in database", async () => {
+    await createUser({
+      username: "user1",
+      email: "user1@mail.com",
+      password: "P4ssword",
+    });
+    const users = await User.findAll();
 
-  //   const firstUser = users[0];
-  //   return expect(firstUser.password).not.toBe("P4ssword");
-  // });
+    const firstUser = users[0];
+    return expect(firstUser.password).not.toBe("P4ssword");
+  });
 
-  // it("returns 422 when username is null", async () => {
-  //   const response = await createUser({
-  //     username: null,
-  //     email: "user1@mail.com",
-  //     password: "P4ssword",
-  //   });
-  //   return expect(response.status).toBe(422);
-  // });
+  it("returns 422 when username is null", async () => {
+    const response = await createUser({
+      username: null,
+      email: "user1@mail.com",
+      password: "P4ssword",
+    });
+    return expect(response.status).toBe(422);
+  });
 
   it.each([
-    ["username", "No username given."],
-    ["email", "No email given."],
-  ])("when %s is null %s cannot be null", async (field, expectedMessage) => {
+    ["username", translations.en.usernameEmpty],
+    ["email", translations.en.emailEmpty],
+  ])("When %s is null respond with: %s", async (field, expectedMessage) => {
     const response = await createUser({
       username: null,
       email: null,
       password: "P4ssword",
     });
+
     return expect(response.body.validationErrors[field]).toBe(expectedMessage);
   });
 
-  //   (
-  //   "returns validation errors for username in response body when error occurs",
-  //   async () => {
-  //     const response = await createUser({
-  //       username: null,
-  //       email: "user1@mail.com",
-  //       password: "P4ssword",
-  //     });
-  //     return expect(response.body.validationErrors.username).toBe("No username given.");
-  //   }
-  // );
+  it("must return a validation error if username is shorter than 4 characters or higher than 32", async () => {
+    const response = await createUser({
+      username: "usr",
+      email: "user1@mail.com",
+      password: "P4ssword",
+    });
+    return expect(response.body.validationErrors.username).toBe(translations.en.usernameLength);
+  });
+
+  it("must return a validation error if email is not valid", async () => {
+    const response = await createUser({
+      username: "usr",
+      email: "user1@mai",
+      password: "P4ssword",
+    });
+    return expect(response.body.validationErrors.email).toBe(translations.en.emailInvalid);
+  });
+
+  it("must return a validation error if password is not at least 6 characters", async () => {
+    const response = await createUser({
+      username: "usr",
+      email: "user1@mai",
+      password: "poop",
+    });
+    return expect(response.body.validationErrors.password).toBe(translations.en.passwordLength);
+  });
+
+  it("must return a validation error if password doesn't satisfy requirements", async () => {
+    const response = await createUser({
+      username: "usr",
+      email: "user1@mai",
+      password: "alllowercaseyo",
+    });
+    return expect(response.body.validationErrors.password).toBe(translations.en.passwordReqs);
+  });
+
+  it("returns 'Email in use' when the email already exists", async () => {
+    await User.create({
+      username: "user1ishere",
+      email: "thisistest@mail.com",
+      password: "alllowercaseyo",
+    });
+    const response = await createUser({
+      username: "user2",
+      email: "thisistest@mail.com",
+      password: "yesyesYes2",
+    });
+
+    return expect(response.body.validationErrors.email).toBe(translations.en.emailInUse);
+  });
+
+  it("returns all errors is username is null and email in use", async () => {
+    await User.create({
+      username: "user1ishere",
+      email: "thisistest@mail.com",
+      password: "alllowercaseyo",
+    });
+    const response = await createUser({
+      username: null,
+      email: "thisistest@mail.com",
+      password: "P4ssword",
+    });
+
+    return expect(Object.keys(response.body.validationErrors)).toEqual(["username", "email"]);
+  });
 });

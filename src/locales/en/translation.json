@@ -1,0 +1,11 @@
+{
+  "registerSuccess": "Registered!",
+  "usernameEmpty": "No username given.",
+  "usernameLength": "Must be shorter than 4 and higher than 32 characters.",
+  "emailEmpty": "No email given.",
+  "emailInvalid": "Email is not valid.",
+  "emailInUse": "Email in use.",
+  "passwordEmpty": "No password given.",
+  "passwordReqs": "Password must have at least 1 lowercase, 1 uppercase and 1 number character.",
+  "passwordLength": "Password must be at least 6 characters."
+}

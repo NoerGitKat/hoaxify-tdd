@@ -1,1 +1,1 @@
-export { validateUser } from "./validation";
+export { isNewEmail } from "./validation";
