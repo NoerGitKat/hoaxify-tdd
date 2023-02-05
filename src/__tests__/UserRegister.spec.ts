@@ -1,4 +1,5 @@
 import { expect } from "@jest/globals";
+import { interactsWithMail as iwm } from "nodemailer-stub";
 import db from "../config/db";
 import { createUser } from "../helpers";
 import translations from "../locales";
@@ -185,5 +186,15 @@ describe("User Registration - Test Suite", () => {
     const firstUser = users[0];
 
     expect(firstUser.activationToken).toBeTruthy();
+  });
+
+  it("sends an account activation mail with activation token", async () => {
+    await createUser();
+    const lastMail = iwm.lastMail();
+    const users = await User.findAll();
+    const firstUser = users[0];
+
+    expect(lastMail.to[0]).toBe("user1@mail.com");
+    expect(lastMail.content).toContain(firstUser.activationToken);
   });
 });

@@ -1,5 +1,6 @@
 import { hash } from "bcrypt";
 import { randomBytes } from "crypto";
+
 import { User } from "../models";
 import { TUser } from "../types";
 

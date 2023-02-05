@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import UserService from "../services/UserService";
+import { EmailService, UserService } from "../services";
 import { TUser } from "../types";
 
 export async function registerUser(req: Request<TUser>, res: Response) {
@@ -17,6 +17,7 @@ export async function registerUser(req: Request<TUser>, res: Response) {
   try {
     const newUser = await UserService.save(req.body);
     if (newUser) {
+      await EmailService.sendAccountActivitationMail(newUser.email, newUser.activationToken);
       return res.status(200).json({ message: req.t("registerSuccess") });
     }
   } catch (error) {
