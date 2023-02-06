@@ -6,6 +6,7 @@ const translations = {
     emailEmpty: "No email given.",
     emailInvalid: "Email is not valid.",
     emailInUse: "Email in use.",
+    emailFailure: "Failed to deliver mail.",
     passwordReqs: "Password must have at least 1 lowercase, 1 uppercase and 1 number character.",
     passwordLength: "Password must be at least 6 characters.",
   },
@@ -16,6 +17,7 @@ const translations = {
     emailEmpty: "Geen e-mailadres opgegeven.",
     emailInvalid: "E-mail is niet geldig.",
     emailInUse: "E-mail in gebruik.",
+    emailFailure: "Bezorgen van mail mislukt.",
     passwordReqs:
       "Wachtwoord moet minimaal 1 kleine letter, 1 hoofdletter en 1 cijferteken bevatten.",
     passwordLength: "Wachtwoord moet minimaal 6 tekens lang zijn.",

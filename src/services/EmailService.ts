@@ -1,7 +1,7 @@
 import { createTransport } from "nodemailer";
 import { stubTransport } from "nodemailer-stub";
 
-async function sendAccountActivitationMail(receiver: string, token: string) {
+async function sendAccountActivationMail(receiver: string, token: string) {
   const transport = createTransport(stubTransport);
   const mail = await transport.sendMail({
     from: "john.doe@domain.com",
@@ -12,4 +12,4 @@ async function sendAccountActivitationMail(receiver: string, token: string) {
   return mail;
 }
 
-export default { sendAccountActivitationMail };
+export default { sendAccountActivationMail };

@@ -3,6 +3,7 @@ import db from "../config/db";
 import { createUser } from "../helpers";
 import translations from "../locales";
 import { User } from "../models";
+import { EmailService } from "../services";
 
 describe("I18n", () => {
   beforeAll(() => {
@@ -24,5 +25,21 @@ describe("I18n", () => {
     );
 
     return expect(response.body.message).toBe(translations.nl.registerSuccess);
+  });
+
+  it("returns email failure message when sending mail fails in NL", async () => {
+    const mockSendMail = jest.spyOn(EmailService, "sendAccountActivationMail").mockRejectedValue({
+      message: translations.nl.emailFailure,
+    });
+    const response = await createUser(
+      {
+        username: "user2",
+        email: "user2@mail.com",
+        password: "P4ssword",
+      },
+      { language: "nl" }
+    );
+    expect(response.body.message).toBe(translations.nl.emailFailure);
+    mockSendMail.mockRestore();
   });
 });

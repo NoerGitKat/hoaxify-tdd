@@ -1,9 +1,10 @@
-import { expect } from "@jest/globals";
+import { expect, jest } from "@jest/globals";
 import { interactsWithMail as iwm } from "nodemailer-stub";
 import db from "../config/db";
 import { createUser } from "../helpers";
 import translations from "../locales";
 import { User } from "../models";
+import { EmailService } from "../services";
 
 describe("User Registration - Test Suite", () => {
   beforeAll(() => {
@@ -197,4 +198,33 @@ describe("User Registration - Test Suite", () => {
     expect(lastMail.to[0]).toBe("user1@mail.com");
     expect(lastMail.content).toContain(firstUser.activationToken);
   });
+
+  it("returns 502 status code when sending email fails", async () => {
+    const mockSendMail = jest.spyOn(EmailService, "sendAccountActivationMail").mockRejectedValue({
+      message: translations.en.emailFailure,
+    });
+    const response = await createUser();
+    expect(response.status).toBe(502);
+    mockSendMail.mockRestore();
+  });
+
+  it("returns email failure message when sending mail fails", async () => {
+    const mockSendMail = jest.spyOn(EmailService, "sendAccountActivationMail").mockRejectedValue({
+      message: translations.en.emailFailure,
+    });
+    const response = await createUser();
+    expect(response.body.message).toBe(translations.en.emailFailure);
+    mockSendMail.mockRestore();
+  });
+
+  // it("does not save user to database if activation email fails", async () => {
+  //   const mockSendMail = jest.spyOn(EmailService, "sendAccountActivationMail").mockRejectedValue({
+  //     message: translations.en.emailFailure,
+  //   });
+  //   const newUser = { username: "user1", email: "user1@mail.com", password: "P4ssword" };
+  //   await createUser(newUser);
+  //   mockSendMail.mockRestore();
+  //   const user = await User.findOne({ where: { email: newUser.email } });
+  //   expect(user).toBeUndefined();
+  // });
 });

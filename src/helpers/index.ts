@@ -12,3 +12,10 @@ export const createUser = (
   }
   return agent.send(user);
 };
+
+export function isError(error: unknown): error is Error {
+  if (error && typeof error === "object" && "message" in error) {
+    return true;
+  }
+  return false;
+}
