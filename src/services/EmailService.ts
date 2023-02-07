@@ -1,8 +1,13 @@
 import { createTransport } from "nodemailer";
-import { stubTransport } from "nodemailer-stub";
 
 async function sendAccountActivationMail(receiver: string, token: string) {
-  const transport = createTransport(stubTransport);
+  const transport = createTransport({
+    host: "localhost",
+    port: 8587,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
   const mail = await transport.sendMail({
     from: "john.doe@domain.com",
     to: receiver,

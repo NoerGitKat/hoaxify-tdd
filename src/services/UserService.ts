@@ -23,7 +23,7 @@ async function save(user: { username: string; password: string; email: string })
   } catch (error) {
     await transaction.rollback();
     if (isError(error)) {
-      throw new Error(error.message);
+      throw new Error("emailFailure");
     }
   }
 }

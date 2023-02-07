@@ -22,7 +22,7 @@ export async function registerUser(req: Request<TUser>, res: Response) {
     }
   } catch (error) {
     if (isError(error)) {
-      return res.status(502).json({ message: error.message });
+      return res.status(502).json({ message: req.t(error.message) });
     }
   }
 }

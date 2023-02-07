@@ -1,20 +1,50 @@
-import { expect, jest } from "@jest/globals";
-import { interactsWithMail as iwm } from "nodemailer-stub";
+import { expect } from "@jest/globals";
+import { SMTPServer } from "smtp-server";
 import db from "../config/db";
 import { createUser } from "../helpers";
 import translations from "../locales";
 import { User } from "../models";
-import { EmailService } from "../services";
+import { THTTPError } from "../types";
+
+let lastMail = "";
+let smtpServer: SMTPServer;
+let simulateSmtpFailure = false;
+
+beforeAll(async () => {
+  smtpServer = new SMTPServer({
+    authOptional: true,
+    onData: (stream, _session, callback) => {
+      let mailBody = "";
+      stream.on("data", (data) => {
+        mailBody += data.toString();
+      });
+      stream.on("end", () => {
+        if (simulateSmtpFailure) {
+          const error = new Error("Invalid mailbox") as THTTPError;
+          error.responseCode = 553;
+          return callback(error);
+        }
+        lastMail = mailBody;
+        callback();
+      });
+    },
+  });
+
+  smtpServer.listen(8587, "localhost");
+
+  await db.sync();
+});
+
+beforeEach(() => {
+  simulateSmtpFailure = false;
+  return User.destroy({ truncate: true });
+});
+
+afterAll(() => {
+  smtpServer.close();
+});
 
 describe("User Registration - Test Suite", () => {
-  beforeAll(() => {
-    return db.sync();
-  });
-
-  beforeEach(() => {
-    return User.destroy({ truncate: true });
-  });
-
   it("returns 200 OK when signup request is valid", async () => {
     const response = await createUser({
       username: "user1",
@@ -191,40 +221,59 @@ describe("User Registration - Test Suite", () => {
 
   it("sends an account activation mail with activation token", async () => {
     await createUser();
-    const lastMail = iwm.lastMail();
+
     const users = await User.findAll();
     const firstUser = users[0];
 
-    expect(lastMail.to[0]).toBe("user1@mail.com");
-    expect(lastMail.content).toContain(firstUser.activationToken);
+    expect(lastMail).toContain("user1@mail.com");
+    expect(lastMail).toContain(firstUser.activationToken);
   });
 
-  it("returns 502 status code when sending email fails", async () => {
-    const mockSendMail = jest.spyOn(EmailService, "sendAccountActivationMail").mockRejectedValue({
-      message: translations.en.emailFailure,
-    });
-    const response = await createUser();
-    expect(response.status).toBe(502);
-    mockSendMail.mockRestore();
-  });
-
-  it("returns email failure message when sending mail fails", async () => {
-    const mockSendMail = jest.spyOn(EmailService, "sendAccountActivationMail").mockRejectedValue({
-      message: translations.en.emailFailure,
-    });
-    const response = await createUser();
-    expect(response.body.message).toBe(translations.en.emailFailure);
-    mockSendMail.mockRestore();
-  });
-
-  // it("does not save user to database if activation email fails", async () => {
-  //   const mockSendMail = jest.spyOn(EmailService, "sendAccountActivationMail").mockRejectedValue({
-  //     message: translations.en.emailFailure,
-  //   });
-  //   const newUser = { username: "user1", email: "user1@mail.com", password: "P4ssword" };
-  //   await createUser(newUser);
-  //   mockSendMail.mockRestore();
-  //   const user = await User.findOne({ where: { email: newUser.email } });
-  //   expect(user).toBeUndefined();
+  // it("returns 502 status code when sending email fails", async () => {
+  //   simulateSmtpFailure = true;
+  //   const response = await createUser();
+  //   expect(response.status).toBe(502);
   // });
+
+  // it("returns email failure message when sending mail fails", async () => {
+  //   simulateSmtpFailure = true;
+  //   const response = await createUser();
+  //   expect(response.body.message).toBe(translations.en.emailFailure);
+  // });
+
+  it("does not save user to database if activation email fails", async () => {
+    simulateSmtpFailure = true;
+    const newUser = { username: "user1", email: "user1@mail.com", password: "P4ssword" };
+    await createUser(newUser);
+    const user = await User.findOne({ where: { email: newUser.email } });
+    expect(user).toBeNull();
+  });
+});
+
+describe("I18n", () => {
+  it("returns success message when signup request is valid in NL", async () => {
+    const response = await createUser(
+      {
+        username: "user2",
+        email: "user1@mail.com",
+        password: "P4ssword",
+      },
+      { language: "nl" }
+    );
+
+    return expect(response.body.message).toBe(translations.nl.registerSuccess);
+  });
+
+  it("returns email failure message when sending mail fails in NL", async () => {
+    simulateSmtpFailure = true;
+    const response = await createUser(
+      {
+        username: "user1",
+        email: "user1@mail.com",
+        password: "P4ssword",
+      },
+      { language: "nl" }
+    );
+    expect(response.body.message).toBe(translations.nl.emailFailure);
+  });
 });

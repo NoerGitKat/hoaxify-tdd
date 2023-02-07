@@ -3,3 +3,7 @@ export type TUser = {
   email: string | null;
   password: string;
 };
+
+export type THTTPError = Error & {
+  responseCode: number;
+};
