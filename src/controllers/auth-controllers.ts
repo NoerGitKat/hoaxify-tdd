@@ -26,3 +26,15 @@ export async function registerUser(req: Request<TUser>, res: Response) {
     }
   }
 }
+
+export async function activateAccount(req: Request<{ token: string }>, res: Response) {
+  const { token } = req.params;
+  try {
+    await UserService.activate(token);
+    return res.status(204).json({ message: "success" });
+  } catch (error) {
+    if (isError(error)) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+}

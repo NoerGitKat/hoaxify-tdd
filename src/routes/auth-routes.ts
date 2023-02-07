@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { check } from "express-validator";
 import { registerUser } from "../controllers";
+import { activateAccount } from "../controllers/auth-controllers";
 import { isNewEmail } from "../middlewares";
 
 const authRouter = Router();
@@ -33,5 +34,7 @@ authRouter.route("/register").post(
   ],
   registerUser
 );
+
+authRouter.route("/token/:token").post(activateAccount);
 
 export default authRouter;

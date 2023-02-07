@@ -1,7 +1,7 @@
 import { expect } from "@jest/globals";
 import { SMTPServer } from "smtp-server";
 import db from "../config/db";
-import { createUser } from "../helpers";
+import { activateToken, createUser } from "../helpers";
 import translations from "../locales";
 import { User } from "../models";
 import { THTTPError } from "../types";
@@ -275,5 +275,18 @@ describe("I18n", () => {
       { language: "nl" }
     );
     expect(response.body.message).toBe(translations.nl.emailFailure);
+  });
+});
+
+describe("account activation", () => {
+  it("activates the new account when correct token is sent", async () => {
+    await createUser();
+    const users = await User.findAll();
+    const token = users[0].activationToken;
+    await activateToken(token);
+    const currentUser = await User.findOne({ where: { activationToken: token } });
+    if (currentUser) {
+      expect(currentUser.inactive).toBe(false);
+    }
   });
 });

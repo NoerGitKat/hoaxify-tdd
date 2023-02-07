@@ -13,6 +13,11 @@ export const createUser = (
   return agent.send(user);
 };
 
+export const activateToken = async (token: string) => {
+  const response = await request(app).post(`/api/v1/auth/token/${token}`).send();
+  return response;
+};
+
 export function isError(error: unknown): error is Error {
   if (error && typeof error === "object" && "message" in error) {
     return true;

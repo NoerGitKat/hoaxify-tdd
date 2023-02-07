@@ -36,4 +36,13 @@ function generateToken(length: number) {
   return randomBytes(length).toString("hex");
 }
 
-export default { save, findByEmail };
+async function activate(token: string) {
+  const user = await User.findOne({ where: { activationToken: token } });
+  if (!user) return false;
+  user.inactive = false;
+  await user.save();
+  console.log("afteer what is user is what", user);
+  return true;
+}
+
+export default { save, findByEmail, activate };
