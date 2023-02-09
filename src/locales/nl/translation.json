@@ -8,5 +8,7 @@
   "emailFailure": "Bezorgen van mail mislukt.",
   "passwordEmpty": "Geen wachtwoord opgegeven.",
   "passwordReqs": "Wachtwoord moet minimaal 1 kleine letter, 1 hoofdletter en 1 cijferteken bevatten.",
-  "passwordLength": "Wachtwoord moet minimaal 6 tekens lang zijn."
+  "passwordLength": "Wachtwoord moet minimaal 6 tekens lang zijn.",
+  "invalidToken": "Token is ongeldig."
+
 }

@@ -229,17 +229,17 @@ describe("User Registration - Test Suite", () => {
     expect(lastMail).toContain(firstUser.activationToken);
   });
 
-  // it("returns 502 status code when sending email fails", async () => {
-  //   simulateSmtpFailure = true;
-  //   const response = await createUser();
-  //   expect(response.status).toBe(502);
-  // });
+  it("returns 502 status code when sending email fails", async () => {
+    simulateSmtpFailure = true;
+    const response = await createUser();
+    expect(response.status).toBe(502);
+  });
 
-  // it("returns email failure message when sending mail fails", async () => {
-  //   simulateSmtpFailure = true;
-  //   const response = await createUser();
-  //   expect(response.body.message).toBe(translations.en.emailFailure);
-  // });
+  it("returns email failure message when sending mail fails", async () => {
+    simulateSmtpFailure = true;
+    const response = await createUser();
+    expect(response.body.message).toBe(translations.en.emailFailure);
+  });
 
   it("does not save user to database if activation email fails", async () => {
     simulateSmtpFailure = true;
@@ -283,10 +283,34 @@ describe("account activation", () => {
     await createUser();
     const users = await User.findAll();
     const token = users[0].activationToken;
-    await activateToken(token);
+    if (token) await activateToken(token);
     const currentUser = await User.findOne({ where: { activationToken: token } });
     if (currentUser) {
       expect(currentUser.inactive).toBe(false);
     }
+  });
+  it("remove token from user after success account activation", async () => {
+    await createUser();
+    const users = await User.findAll();
+    const token = users[0].activationToken;
+    if (token) await activateToken(token);
+    const currentUser = await User.findOne({ where: { activationToken: token } });
+    if (currentUser) {
+      expect(currentUser.activationToken).toBeFalsy();
+    }
+  });
+  it("does not activate account when token is invalid", async () => {
+    await createUser();
+    const invalidToken = "123asda";
+    await activateToken(invalidToken);
+    const users = await User.findAll();
+    expect(users[0].inactive).toBe(true);
+  });
+  it("throws an error when token is invalid", async () => {
+    await createUser();
+    const invalidToken = "123asda";
+    const response = await activateToken(invalidToken);
+
+    expect(response.body.message).toBe(translations.en.invalidToken);
   });
 });

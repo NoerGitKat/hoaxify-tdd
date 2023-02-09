@@ -38,10 +38,10 @@ function generateToken(length: number) {
 
 async function activate(token: string) {
   const user = await User.findOne({ where: { activationToken: token } });
-  if (!user) return false;
+  if (!user) throw new Error("invalidToken");
   user.inactive = false;
+  user.activationToken = null;
   await user.save();
-  console.log("afteer what is user is what", user);
   return true;
 }
 

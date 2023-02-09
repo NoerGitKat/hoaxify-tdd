@@ -34,7 +34,7 @@ export async function activateAccount(req: Request<{ token: string }>, res: Resp
     return res.status(204).json({ message: "success" });
   } catch (error) {
     if (isError(error)) {
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: req.t("invalidToken") });
     }
   }
 }

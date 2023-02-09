@@ -1,4 +1,4 @@
-import { Column, Default, Model, Table } from "sequelize-typescript";
+import { Column, DataType, Default, Model, Table } from "sequelize-typescript";
 
 @Table({
   indexes: [{ fields: ["email"], unique: true }],
@@ -12,7 +12,7 @@ class User extends Model {
 
   @Default(true) @Column inactive!: boolean;
 
-  @Column activationToken!: string;
+  @Column({ type: DataType.STRING }) activationToken!: string | null;
 }
 
 export default User;
